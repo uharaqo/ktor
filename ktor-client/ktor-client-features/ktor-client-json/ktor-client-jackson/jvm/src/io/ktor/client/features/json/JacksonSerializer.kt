@@ -10,6 +10,7 @@ import io.ktor.client.call.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import kotlinx.io.core.*
+import kotlin.reflect.*
 
 class JacksonSerializer(block: ObjectMapper.() -> Unit = {}) : JsonSerializer {
 
@@ -18,7 +19,7 @@ class JacksonSerializer(block: ObjectMapper.() -> Unit = {}) : JsonSerializer {
     override fun write(data: Any, contentType: ContentType): OutgoingContent =
         TextContent(backend.writeValueAsString(data), contentType)
 
-    override fun read(type: TypeInfo, body: Input): Any {
-        return backend.readValue(body.readText(), backend.typeFactory.constructType(type.reifiedType))
+    override fun read(type: KType, body: Input): Any {
+        return backend.readValue(body.readText(), backend.typeFactory.constructType(type.javaClass))
     }
 }

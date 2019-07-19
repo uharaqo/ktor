@@ -74,17 +74,17 @@ open class HttpClientCall internal constructor(
      * @throws NoTransformationFoundException If no transformation is found for the [expectedType].
      * @throws DoubleReceiveException If already called [receive].
      */
-    suspend fun receive(info: TypeInfo): Any {
-        if (response.instanceOf(info.type)) return response
+    suspend fun receive(info: KType): Any {
+        if (response.instanceOf(info.classifier!!)) return response
         if (!received.compareAndSet(false, true)) throw DoubleReceiveException(this)
 
         val responseData = attributes.getOrNull(CustomResponse) ?: response.content
 
         val subject = HttpResponseContainer(info, responseData)
         val result = client.responsePipeline.execute(this, subject).response
-        if (!result.instanceOf(info.type)) {
+        if (!result.instanceOf(info.classifier!!)) {
             val from = result::class
-            val to = info.type
+            val to = info.classifier!!
             throw NoTransformationFoundException(from, to)
         }
 
@@ -145,7 +145,8 @@ suspend fun HttpClient.call(block: suspend HttpRequestBuilder.() -> Unit = {}): 
  * @throws NoTransformationFoundException If no transformation is found for the type [T].
  * @throws DoubleReceiveException If already called [receive].
  */
-suspend inline fun <reified T> HttpClientCall.receive(): T = receive(typeInfo<T>()) as T
+@UseExperimental(ExperimentalStdlibApi::class)
+suspend inline fun <reified T> HttpClientCall.receive(): T = receive(typeOf<T>()) as T
 
 /**
  * Tries to receive the payload of the [response] as an specific type [T].
@@ -153,7 +154,8 @@ suspend inline fun <reified T> HttpClientCall.receive(): T = receive(typeInfo<T>
  * @throws NoTransformationFoundException If no transformation is found for the type [T].
  * @throws DoubleReceiveException If already called [receive].
  */
-suspend inline fun <reified T> HttpResponse.receive(): T = call.receive(typeInfo<T>()) as T
+@UseExperimental(ExperimentalStdlibApi::class)
+suspend inline fun <reified T> HttpResponse.receive(): T = call.receive(typeOf<T>()) as T
 
 /**
  * Exception representing that the response payload has already been received.
@@ -170,7 +172,7 @@ class DoubleReceiveException(call: HttpClientCall) : IllegalStateException() {
 @Suppress("KDocMissingDocumentation")
 class ReceivePipelineException(
     val request: HttpClientCall,
-    val info: TypeInfo,
+    val info: KType,
     override val cause: Throwable
 ) : IllegalStateException("Fail to run receive pipeline: $cause")
 
@@ -179,6 +181,6 @@ class ReceivePipelineException(
  * It includes the received type and the expected type as part of the message.
  */
 @Suppress("KDocMissingDocumentation")
-class NoTransformationFoundException(from: KClass<*>, to: KClass<*>) : UnsupportedOperationException() {
+class NoTransformationFoundException(from: KClassifier, to: KClassifier) : UnsupportedOperationException() {
     override val message: String? = "No transformation found: $from -> $to"
 }

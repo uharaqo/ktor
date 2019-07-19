@@ -136,7 +136,7 @@ class HttpPlainText internal constructor(
             }
 
             scope.responsePipeline.intercept(HttpResponsePipeline.Parse) { (info, body) ->
-                if (info.type != String::class || body !is ByteReadChannel) return@intercept
+                if (info.classifier != String::class || body !is ByteReadChannel) return@intercept
                 val content = feature.read(context, body.readRemaining())
                 proceedWith(HttpResponseContainer(info, content))
             }

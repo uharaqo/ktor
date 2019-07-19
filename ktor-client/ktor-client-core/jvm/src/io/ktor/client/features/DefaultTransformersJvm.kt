@@ -14,7 +14,7 @@ import java.io.*
 internal actual fun HttpClient.platformDefaultTransformers() {
     responsePipeline.intercept(HttpResponsePipeline.Parse) { (info, body) ->
         if (body !is ByteReadChannel) return@intercept
-        when (info.type) {
+        when (info.classifier) {
             InputStream::class -> {
                 val stream = body.toInputStream(context.coroutineContext[Job])
                 val response = object : InputStream() {

@@ -37,7 +37,7 @@ fun HttpClient.defaultTransformers() {
         val response = context.response
         val contentLength = response.headers[HttpHeaders.ContentLength]?.toLong() ?: Long.MAX_VALUE
 
-        when (info.type) {
+        when (info.classifier) {
             Unit::class -> {
                 response.close()
                 proceedWith(HttpResponseContainer(info, Unit))

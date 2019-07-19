@@ -24,13 +24,13 @@ import kotlin.reflect.*
  * }
  * ```
  */
-@UseExperimental(ImplicitReflectionSerializer::class, UnstableDefault::class)
+@UseExperimental(ImplicitReflectionSerializer::class, UnstableDefault::class, ExperimentalStdlibApi::class)
 class KotlinxSerializer(
     private val json: Json = Json.plain
 ) : JsonSerializer {
     @Suppress("UNCHECKED_CAST")
-    private val mappers: MutableMap<KClass<*>, KSerializer<*>> = mutableMapOf()
-    private val listMappers: MutableMap<KClass<*>, KSerializer<*>> = mutableMapOf()
+    private val mappers: MutableMap<KClassifier, KSerializer<*>> = mutableMapOf()
+    private val listMappers: MutableMap<KClassifier, KSerializer<*>> = mutableMapOf()
 
     /**
      * Set mapping from [type] to generated [KSerializer].
@@ -81,8 +81,8 @@ class KotlinxSerializer(
         return TextContent(content, contentType)
     }
 
-    override fun read(type: TypeInfo, body: Input): Any {
-        val mapper = lookupSerializerByType(type.type)
+    override fun read(type: KType, body: Input): Any {
+        val mapper = lookupSerializerByType(type)
         val text = body.readText()
 
         @Suppress("UNCHECKED_CAST")
@@ -100,9 +100,10 @@ class KotlinxSerializer(
         return (type.defaultSerializer() ?: type.serializer())
     }
 
-    private fun lookupSerializerByType(type: KClass<*>): KSerializer<*> {
-        mappers[type]?.let { return it }
-        return (type.defaultSerializer() ?: type.serializer())
+    private fun lookupSerializerByType(type: KType): KSerializer<*> {
+        val classifier = type.classifier as KClass<*>
+        mappers[classifier]?.let { return it }
+        return (classifier.defaultSerializer() ?: classifier.serializer())
     }
 
     companion object {

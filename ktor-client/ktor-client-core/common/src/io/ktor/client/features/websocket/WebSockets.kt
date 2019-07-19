@@ -39,8 +39,10 @@ class WebSockets(
 
             scope.responsePipeline.intercept(HttpResponsePipeline.Transform) { (info, session) ->
                 if (session !is WebSocketSession) return@intercept
-                if (info.type == DefaultClientWebSocketSession::class) {
-                    val clientSession = with(feature) { DefaultClientWebSocketSession(context, session.asDefault()) }
+                if (info.classifier == DefaultClientWebSocketSession::class) {
+                    val clientSession = with(feature) {
+                        DefaultClientWebSocketSession(context, session.asDefault())
+                    }
                     proceedWith(HttpResponseContainer(info, clientSession))
                     return@intercept
                 }

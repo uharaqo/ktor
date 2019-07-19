@@ -9,21 +9,38 @@ import kotlin.reflect.*
 /**
  * Information about type.
  */
-expect interface Type
+@Deprecated(
+    "Ktor Type deprecated. Consider using [KType] instead.",
+    ReplaceWith("KType"),
+    DeprecationLevel.ERROR
+)
+typealias Type = KType
 
 /**
  * Ktor type information.
  * @param type: source KClass<*>
  * @param reifiedType: type with substituted generics
  */
-data class TypeInfo(val type: KClass<*>, val reifiedType: Type)
+@Deprecated(
+    "[TypeInfo] deprecated. Consider using [KType] instead.",
+    ReplaceWith("typeOf<>()"),
+    DeprecationLevel.ERROR
+)
+data class TypeInfo(val type: KClass<*>, val reifiedType: KType)
 
 /**
  * Returns [TypeInfo] for the specified type [T]
  */
-expect inline fun <reified T> typeInfo(): TypeInfo
+@UseExperimental(ExperimentalStdlibApi::class)
+@Deprecated(
+    "[typeInfo] deprecated. Consider using [typeOf] instead.",
+    ReplaceWith("typeOf<>()"),
+    DeprecationLevel.ERROR
+)
+@Suppress("DEPRECATION_ERROR")
+inline fun <reified T> typeInfo(): TypeInfo = error("[typeInfo] deprecated. Consider using [typeOf] instead.")
 
 /**
  * Check [this] is instance of [type].
  */
-internal expect fun Any.instanceOf(type: KClass<*>): Boolean
+internal expect fun Any.instanceOf(type: KClassifier): Boolean
