@@ -111,7 +111,7 @@ class PipelineTest {
                 p2.execute(Unit, "p2")
                 proceed()
                 events.add("success-p1-1 $subject")
-            } catch(t: Throwable) {
+            } catch (t: Throwable) {
                 events.add("fail-p1-1 $subject")
                 throw t
             }
@@ -123,7 +123,8 @@ class PipelineTest {
         }
 
         p1.executeBlocking("p1")
-        assertEquals(listOf(
+        assertEquals(
+            listOf(
                 "intercept-p1-1 p1",
                 "intercept-p2-1 p2",
                 "intercept-p3-1 p3",
@@ -131,7 +132,8 @@ class PipelineTest {
                 "success-p2-1 p2",
                 "intercept-p1-2 p1",
                 "success-p1-1 p1"
-        ), events)
+            ), events
+        )
     }
 
     @Test
@@ -278,8 +280,12 @@ class PipelineTest {
         assertFailsWith<UnsupportedOperationException> {
             pipeline.executeBlocking("some")
         }
-        assertEquals(listOf("intercept1 some", "intercept2 some", "intercept3 another",
-                "intercept4 some", "fail1 some"), events)
+        assertEquals(
+            listOf(
+                "intercept1 some", "intercept2 some", "intercept3 another",
+                "intercept4 some", "fail1 some"
+            ), events
+        )
     }
 
     @Test
@@ -367,7 +373,11 @@ class PipelineTest {
         assertEquals(listOf("intercept1 some", "future1 some", "intercept2 another", "success1 some"), events)
     }
 
-    private fun checkBeforeAfterPipeline(after: PipelinePhase, before: PipelinePhase, pipeline: Pipeline<String, Unit>) {
+    private fun checkBeforeAfterPipeline(
+        after: PipelinePhase,
+        before: PipelinePhase,
+        pipeline: Pipeline<String, Unit>
+    ) {
         var value = false
         pipeline.intercept(after) {
             value = true
@@ -418,4 +428,67 @@ class PipelineTest {
         pipeline.insertPhaseAfter(before, after)
         checkBeforeAfterPipeline(after, before, pipeline)
     }
+
+    @Test
+    fun testStackTrace() {
+        suspend fun bar3(i: Int) {
+            yield() // Important: suspension point
+            if (i == 1) throw RuntimeException()
+            yield()
+        }
+
+        suspend fun bar2(i: Int) {
+            bar3(i)
+            yield()
+        }
+
+        suspend fun bar1(i: Int) {
+            bar2(i)
+            yield()
+        }
+
+        val pipeline = pipeline()
+        pipeline.intercept { subject -> bar1(1) }
+        try {
+            pipeline.executeBlocking("some")
+        } catch (cause: Throwable) {
+            // TODO: fix and check
+        }
+    }
+
+    @Test
+    fun testStackTraceWithMultipleInterceptors() {
+        val pipeline = pipeline()
+
+        pipeline.intercept { content -> yield(); proceedWith("$content first") }
+        pipeline.intercept { content -> yield(); proceedWith("$content second") }
+        pipeline.intercept { content -> yield(); error(content) }
+
+        try {
+            pipeline.executeBlocking("start")
+        } catch (cause: Throwable) {
+            val stackTrace = cause.stackTrace
+            assertEquals(5, stackTrace.size)
+
+            assertEquals(
+                "io.ktor.tests.utils.PipelineTest\$testStackTraceWithMultipleInterceptors\$3.invokeSuspend(PipelineTest.kt:465)",
+                stackTrace[0].toString()
+            )
+            assertEquals("\b\b\b(Coroutine boundary.\b(\b)", stackTrace[1].toString())
+            assertEquals(
+                "io.ktor.tests.utils.PipelineTest\$testStackTraceWithMultipleInterceptors\$2.invokeSuspend(PipelineTest.kt:464)",
+                stackTrace[2].toString()
+            )
+            assertEquals(
+                "io.ktor.tests.utils.PipelineTest\$testStackTraceWithMultipleInterceptors\$1.invokeSuspend(PipelineTest.kt:463)",
+                stackTrace[3].toString()
+            )
+            assertEquals(
+                "io.ktor.tests.utils.PipelineTest\$executeBlocking\$1.invokeSuspend(PipelineTest.kt:15)",
+                stackTrace[4].toString()
+            )
+        }
+    }
 }
+
+
