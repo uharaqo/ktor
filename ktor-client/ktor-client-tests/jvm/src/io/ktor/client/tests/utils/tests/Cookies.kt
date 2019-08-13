@@ -43,7 +43,7 @@ internal fun Application.cookiesTest() {
                 context.respond("Multiple done")
             }
             get("/withPath") {
-                val cookie = Cookie("marker", "value", path = "/withPath/")
+                val cookie = Cookie("marker", "value", path = "/cookies/withPath/")
                 context.response.cookies.append(cookie)
                 context.respond("OK")
             }

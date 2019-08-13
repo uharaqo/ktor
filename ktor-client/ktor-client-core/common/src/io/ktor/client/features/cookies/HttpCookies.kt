@@ -65,13 +65,6 @@ class HttpCookies(
             defaultCookies += default
         }
 
-        /**
-         * Setup default cookies by calling [CookiesStorage.addCookie].
-         */
-//        fun default(vararg cookies: Pair<Url, Cookie>) {
-//            defaultCookies += cookies
-//        }
-
         internal fun build(): HttpCookies {
             val storage = storage ?: AcceptAllCookiesStorage()
 
@@ -89,19 +82,24 @@ class HttpCookies(
         override val key: AttributeKey<HttpCookies> = AttributeKey("HttpCookies")
 
         override fun install(feature: HttpCookies, scope: HttpClient) {
-//            val init = scope.launch {
-//                feature.defaults.ad
-//            }
+            val init = scope.launch {
+                feature.defaults.forEach { (url, cookie) ->
+                    feature.storage.addCookie(url, cookie)
+                }
+            }
 
             scope.sendPipeline.intercept(HttpSendPipeline.State) {
-                val cookies = feature.get(context.url.clone().build())
+                init.join()
 
+                val cookies = feature.get(context.url.clone().build())
                 with(context) {
                     headers[HttpHeaders.Cookie] = renderClientCookies(cookies)
                 }
             }
 
             scope.receivePipeline.intercept(HttpReceivePipeline.State) { response ->
+                init.join()
+
                 val url = context.request.url
                 response.setCookie().forEach {
                     feature.storage.addCookie(url, it)

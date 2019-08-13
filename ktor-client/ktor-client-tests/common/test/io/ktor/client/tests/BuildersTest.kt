@@ -8,6 +8,7 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.tests.utils.*
 import io.ktor.http.*
+import io.ktor.http.cio.*
 import kotlin.collections.get
 import kotlin.test.*
 
@@ -25,9 +26,14 @@ class BuildersTest : ClientLoader() {
     @Test
     fun testNotFound() = clientTests {
         test { client ->
-            assertFailsWith<ResponseException> {
+            var exception: ResponseException? = null
+            try {
                 client.get<String>("$TEST_URL/notFound")
+            } catch (cause: ResponseException) {
+                exception = cause
             }
+
+            assertNotNull(exception)
         }
     }
 

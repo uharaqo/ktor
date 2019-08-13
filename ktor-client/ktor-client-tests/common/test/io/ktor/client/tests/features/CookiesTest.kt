@@ -15,7 +15,7 @@ import kotlin.test.*
 
 class CookiesTest : ClientLoader() {
     private val TEST_URL = "$TEST_SERVER/cookies"
-    private val hostname = "http://localhost"
+    private val hostname = TEST_SERVER
 
     @Test
     fun testCompatibility() = clientTest(MockEngine) {
@@ -86,7 +86,7 @@ class CookiesTest : ClientLoader() {
         config {
             install(HttpCookies) {
                 default(
-                    hostname to Cookie("id", "1", domain = "localhost")
+                    hostname to Cookie("id", "1", domain = "127.0.0.1")
                 )
             }
         }
@@ -106,7 +106,7 @@ class CookiesTest : ClientLoader() {
         config {
             install(HttpCookies) {
                 default(
-                    hostname to Cookie("id", "777", domain = "localhost", path = "/")
+                    hostname to Cookie("id", "777", domain = "127.0.0.1", path = "/")
                 )
             }
 
@@ -122,7 +122,7 @@ class CookiesTest : ClientLoader() {
     fun testConstant(): Unit = clientTests {
         config {
             install(HttpCookies) {
-                storage = ConstantCookiesStorage(Cookie("id", "1", domain = "localhost"))
+                storage = ConstantCookiesStorage(Cookie("id", "1", domain = "127.0.0.1"))
             }
         }
 
@@ -140,8 +140,8 @@ class CookiesTest : ClientLoader() {
         config {
             install(HttpCookies) {
                 default(
-                    hostname to Cookie("first", "first-cookie", domain = "localhost"),
-                    hostname to Cookie("second", "second-cookie", domain = "localhost")
+                    hostname to Cookie("first", "first-cookie", domain = "127.0.0.1"),
+                    hostname to Cookie("second", "second-cookie", domain = "127.0.0.1")
                 )
             }
         }
