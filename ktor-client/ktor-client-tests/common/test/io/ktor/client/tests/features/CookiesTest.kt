@@ -67,7 +67,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testAccept(): Unit = clientTests {
+    fun testAccept() = clientTests {
         config {
             install(HttpCookies)
         }
@@ -82,7 +82,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testUpdate(): Unit = clientTests {
+    fun testUpdate() = clientTests {
         config {
             install(HttpCookies) {
                 default(
@@ -102,7 +102,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testExpiration(): Unit = clientTests {
+    fun testExpiration() = clientTests {
         config {
             install(HttpCookies) {
                 default(
@@ -119,7 +119,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testConstant(): Unit = clientTests {
+    fun testConstant() = clientTests {
         config {
             install(HttpCookies) {
                 storage = ConstantCookiesStorage(Cookie("id", "1", domain = "127.0.0.1"))
@@ -136,7 +136,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testMultipleCookies(): Unit = clientTests {
+    fun testMultipleCookies() = clientTests {
         config {
             install(HttpCookies) {
                 default(
