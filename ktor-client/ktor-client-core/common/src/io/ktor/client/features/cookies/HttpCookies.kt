@@ -24,11 +24,20 @@ class HttpCookies(
     private val storage: CookiesStorage,
     private val defaults: List<Pair<Url, Cookie>>
 ) : Closeable {
+    private lateinit var init: Job
 
     /**
      * Find all cookies by [requestUrl].
      */
-    suspend fun get(requestUrl: Url): List<Cookie> = storage.get(requestUrl)
+    suspend fun get(requestUrl: Url): List<Cookie> {
+        init.join()
+        return storage.get(requestUrl)
+    }
+
+    suspend fun addCookie(url: Url, cookie: Cookie) {
+        init.join()
+        storage.addCookie(url, cookie)
+    }
 
     override fun close() {
         storage.close()
@@ -82,15 +91,13 @@ class HttpCookies(
         override val key: AttributeKey<HttpCookies> = AttributeKey("HttpCookies")
 
         override fun install(feature: HttpCookies, scope: HttpClient) {
-            val init = scope.launch {
+            feature.init = scope.launch {
                 feature.defaults.forEach { (url, cookie) ->
                     feature.storage.addCookie(url, cookie)
                 }
             }
 
             scope.sendPipeline.intercept(HttpSendPipeline.State) {
-                init.join()
-
                 val cookies = feature.get(context.url.clone().build())
                 with(context) {
                     headers[HttpHeaders.Cookie] = renderClientCookies(cookies)
@@ -98,11 +105,9 @@ class HttpCookies(
             }
 
             scope.receivePipeline.intercept(HttpReceivePipeline.State) { response ->
-                init.join()
-
                 val url = context.request.url
                 response.setCookie().forEach {
-                    feature.storage.addCookie(url, it)
+                    feature.addCookie(url, it)
                 }
             }
         }

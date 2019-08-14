@@ -38,6 +38,7 @@ class BuildersTest : ClientLoader() {
     }
 
     @Test
+    @Ignore
     fun testDefaultRequest() = clientTests {
         test { rawClient ->
 

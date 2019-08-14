@@ -74,7 +74,7 @@ class CookiesTest : ClientLoader() {
 
         test { client ->
             client.get<Unit>(TEST_URL)
-            client.cookies(hostname).let {
+            client.cookies("$hostname/cookies").let {
                 assertEquals(1, it.size)
                 assertEquals("my-awesome-value", it["hello-cookie"]!!.value)
             }
@@ -249,5 +249,15 @@ class CookiesTest : ClientLoader() {
         }
     }
 
-    private suspend fun HttpClient.getId() = cookies(hostname)["id"]!!.value.toInt()
+    private suspend fun HttpClient.getId(): Int {
+        val cookie = cookies(hostname)
+        if (cookie.isEmpty()) {
+            val x = cookies(hostname)
+
+            check(x.isEmpty())
+        }
+
+
+        return cookie["id"]!!.value.toInt()
+    }
 }
