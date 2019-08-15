@@ -41,6 +41,9 @@ internal class JsClientEngine(override val config: JsEngineConfig) : HttpClientE
         val rawResponse = fetch(data.url.toString(), rawRequest)
 
         val status = HttpStatusCode(rawResponse.status.toInt(), rawResponse.statusText)
+        if (rawResponse.url.contains("cookies")) {
+            val rawHeaders = rawResponse.headers
+        }
         val headers = rawResponse.headers.mapToKtor()
         val version = HttpProtocolVersion.HTTP_1_1
 
