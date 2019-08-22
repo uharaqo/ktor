@@ -6,7 +6,7 @@ kotlin.sourceSets {
 //        api group: 'org.jetbrains.kotlinx', name: 'kotlinx-io', version: kotlinx_io_version
         api group: 'org.jetbrains.kotlinx', name: 'atomicfu', version: atomicfu_version
 
-        api group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-io', version: kotlinx_io_version
+//        api group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-io', version: kotlinx_io_version
     }
     commonTest.dependencies {
         api "org.jetbrains.kotlin:kotlin-test-common:$kotlin_version"
