@@ -123,12 +123,6 @@ public final class io/ktor/util/CryptoKt {
 	public static final fun sha1 ([B)[B
 }
 
-public final class io/ktor/util/DatesJvmKt {
-	public static final fun getGreenwichMeanTime ()Ljava/time/ZoneId;
-	public static final fun toLocalDateTime (Ljava/util/Date;)Ljava/time/LocalDateTime;
-	public static final fun toZonedDateTime (Ljava/util/Date;)Ljava/time/ZonedDateTime;
-}
-
 public final class io/ktor/util/DeflaterKt {
 	public static final fun deflated (Lio/ktor/utils/io/ByteReadChannel;ZLio/ktor/utils/io/pool/ObjectPool;Lkotlin/coroutines/CoroutineContext;)Lio/ktor/utils/io/ByteReadChannel;
 	public static final fun deflated (Lio/ktor/utils/io/ByteWriteChannel;ZLio/ktor/utils/io/pool/ObjectPool;Lkotlin/coroutines/CoroutineContext;)Lio/ktor/utils/io/ByteWriteChannel;
@@ -491,11 +485,6 @@ public final class io/ktor/util/date/DateKt {
 	public static final fun minus (Lio/ktor/util/date/GMTDate;J)Lio/ktor/util/date/GMTDate;
 	public static final fun plus (Lio/ktor/util/date/GMTDate;J)Lio/ktor/util/date/GMTDate;
 	public static final fun truncateToSeconds (Lio/ktor/util/date/GMTDate;)Lio/ktor/util/date/GMTDate;
-}
-
-public final class io/ktor/util/date/DateUtilsKt {
-	public static final fun toGMTDate (Ljava/time/Instant;)Lio/ktor/util/date/GMTDate;
-	public static final fun toGMTDate (Ljava/time/ZonedDateTime;)Lio/ktor/util/date/GMTDate;
 }
 
 public final class io/ktor/util/date/GMTDate : java/lang/Comparable {
